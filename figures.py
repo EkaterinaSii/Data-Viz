@@ -145,11 +145,14 @@ def make_map(
 def make_country_figures(country_df: pd.DataFrame):
     if country_df.empty:
         msg = empty_figure("No country data to display.")
-        return msg, msg, msg, msg
+        return msg, msg, msg
 
+    # -----------------------------
+    # Plot 1: Historical SBP / DBP trend
+    # -----------------------------
     trend = (
         country_df.groupby("Year", as_index=False)[
-            ["Systolic_BP_mmHg", "Diastolic_BP_mmHg", "Mean_Arterial_Pressure"]
+            ["Systolic_BP_mmHg", "Diastolic_BP_mmHg"]
         ]
         .mean()
         .sort_values("Year")
@@ -158,21 +161,21 @@ def make_country_figures(country_df: pd.DataFrame):
     fig_trend = px.line(
         trend,
         x="Year",
-        y=["Systolic_BP_mmHg", "Diastolic_BP_mmHg", "Mean_Arterial_Pressure"],
+        y=["Systolic_BP_mmHg", "Diastolic_BP_mmHg"],
         markers=True,
-        title="Trend over years",
+        title="Historical trend: systolic and diastolic blood pressure",
     )
 
     fig_trend.update_layout(
         template="plotly_white",
         autosize=True,
         height=None,
-        margin=dict(l=10, r=10, t=40, b=35),
+        margin=dict(l=10, r=10, t=50, b=40),
         legend_title_text="Metric",
         legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1,
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
             xanchor="right",
             x=1,
             font=dict(size=10),
@@ -180,66 +183,147 @@ def make_country_figures(country_df: pd.DataFrame):
     )
 
     fig_trend.update_xaxes(automargin=True)
-    fig_trend.update_yaxes(automargin=True)
+    fig_trend.update_yaxes(title="mmHg", automargin=True)
 
-    age_bp = (
-        country_df.groupby("Age_Group", as_index=False)[
-            ["Systolic_BP_mmHg", "Diastolic_BP_mmHg"]
-        ]
-        .mean()
-        .sort_values("Age_Group")
+    # -----------------------------
+    # Plot 2: BP category by age group
+    # -----------------------------
+    fig_bp_cat = make_bp_category_figure(country_df)
+
+    # -----------------------------
+    # Plot 3: BP category by diabetes status
+    # -----------------------------
+    fig_diabetes = make_diabetes_bp_category_figure(country_df)
+
+    return fig_trend, fig_bp_cat, fig_diabetes
+
+def make_diabetes_bp_category_figure(country_df: pd.DataFrame):
+    required_cols = {"Diabetes", "BP_Category_2"}
+
+    if country_df.empty or not required_cols.issubset(country_df.columns):
+        return empty_figure("No diabetes and BP category data available.")
+
+    dff = country_df[["Diabetes", "BP_Category_2"]].copy()
+    dff = dff.dropna()
+
+    if dff.empty:
+        return empty_figure("No diabetes and BP category data available.")
+
+    def clean_diabetes_label(value):
+        value = str(value).strip()
+        lower_value = value.lower()
+
+        yes_values = {"yes", "has diabetes", "diabetes", "true", "1"}
+        no_values = {"no", "no diabetes", "non-diabetic", "false", "0"}
+
+        if lower_value in yes_values:
+            return "Has Diabetes"
+        if lower_value in no_values:
+            return "No Diabetes"
+
+        return value
+
+    dff["Diabetes_Status"] = dff["Diabetes"].apply(clean_diabetes_label)
+
+    bp_order = [
+        "Normal",
+        "Elevated",
+        "Stage 1 Hypertension",
+        "Stage 2 Hypertension",
+        "Severe Hypertension",
+    ]
+
+    diabetes_order = ["No Diabetes", "Has Diabetes"]
+
+    existing_bp = [
+        bp for bp in bp_order
+        if bp in dff["BP_Category_2"].astype(str).unique().tolist()
+    ]
+
+    existing_diabetes = [
+        status for status in diabetes_order
+        if status in dff["Diabetes_Status"].astype(str).unique().tolist()
+    ]
+
+    extra_diabetes = [
+        status
+        for status in dff["Diabetes_Status"].astype(str).unique().tolist()
+        if status not in existing_diabetes
+    ]
+
+    existing_diabetes = existing_diabetes + sorted(extra_diabetes)
+
+    if not existing_bp or not existing_diabetes:
+        return empty_figure("No diabetes and BP category data available.")
+
+    counts = (
+        dff.groupby(["Diabetes_Status", "BP_Category_2"])
+        .size()
+        .reset_index(name="Count")
     )
 
-    fig_age = px.bar(
-        age_bp,
-        x="Age_Group",
-        y=["Systolic_BP_mmHg", "Diastolic_BP_mmHg"],
-        barmode="group",
-        title="BP by age group",
+    totals = (
+        counts.groupby("Diabetes_Status")["Count"]
+        .sum()
+        .reset_index(name="Total")
     )
 
-    fig_age.update_layout(
+    plot_df = counts.merge(totals, on="Diabetes_Status", how="left")
+    plot_df["Percentage"] = (plot_df["Count"] / plot_df["Total"] * 100).round(1)
+
+    fig = px.bar(
+        plot_df,
+        x="Diabetes_Status",
+        y="Percentage",
+        color="BP_Category_2",
+        category_orders={
+            "Diabetes_Status": existing_diabetes,
+            "BP_Category_2": existing_bp,
+        },
+        title="Blood pressure category by diabetes status",
+        labels={
+            "Diabetes_Status": "Diabetes status",
+            "Percentage": "Percentage of people",
+            "BP_Category_2": "BP category",
+        },
+        text="Percentage",
+    )
+
+    fig.update_traces(
+        texttemplate="%{text:.1f}%",
+        textposition="inside",
+        insidetextanchor="middle",
+        hoverinfo="skip",
+        hovertemplate=None,
+        cliponaxis=False,
+    )
+
+    fig.update_layout(
         template="plotly_white",
         autosize=True,
         height=None,
-        margin=dict(l=10, r=10, t=40, b=80),
-        legend_title_text="Metric",
+        barmode="stack",
+        margin=dict(l=10, r=120, t=50, b=55),
+        legend_title_text="BP category",
         legend=dict(
             orientation="v",
             yanchor="top",
             y=1,
-            xanchor="right",
-            x=1,
-            font=dict(size=10),
+            xanchor="left",
+            x=1.02,
+            font=dict(size=9),
+            bgcolor="rgba(255,255,255,0.85)",
+        ),
+        yaxis=dict(
+            range=[0, 100],
+            ticksuffix="%",
         ),
     )
 
-    fig_age.update_xaxes(tickangle=35, automargin=True)
-    fig_age.update_yaxes(automargin=True)
+    fig.update_xaxes(automargin=True)
+    fig.update_yaxes(automargin=True)
 
-    fig_sex = px.box(
-        country_df,
-        x="Sex",
-        y="Systolic_BP_mmHg",
-        color="Sex",
-        points="outliers",
-        title="Systolic BP by sex",
-    )
-
-    fig_sex.update_layout(
-        template="plotly_white",
-        autosize=True,
-        height=None,
-        margin=dict(l=10, r=10, t=40, b=45),
-        showlegend=False,
-    )
-
-    fig_sex.update_xaxes(automargin=True)
-    fig_sex.update_yaxes(automargin=True)
-
-    fig_bp_cat = make_bp_category_figure(country_df)
-
-    return fig_trend, fig_age, fig_sex, fig_bp_cat
+    return fig
 
 
 def make_bp_category_figure(country_df: pd.DataFrame):
@@ -287,6 +371,7 @@ def make_bp_category_figure(country_df: pd.DataFrame):
             opacity=0.65,
             width=1.4,
             hoverinfo="none",
+            showlegend=False,
         )
     )
 
@@ -346,15 +431,16 @@ def make_bp_category_figure(country_df: pd.DataFrame):
         title="People count by BP category and age group",
         xaxis_title="Blood pressure category",
         yaxis_title="People count",
-        margin=dict(l=10, r=10, t=50, b=80),
+        margin=dict(l=10, r=160, t=50, b=80),
         legend_title_text="Age group",
         legend=dict(
             orientation="v",
             yanchor="top",
             y=1,
-            xanchor="right",
-            x=1,
-            font=dict(size=9),
+            xanchor="left",
+            x=1.02,
+            font=dict(size=8),
+            bgcolor="rgba(255,255,255,0.85)",
         ),
     )
 
@@ -362,7 +448,7 @@ def make_bp_category_figure(country_df: pd.DataFrame):
         tickmode="array",
         tickvals=x_positions,
         ticktext=existing_bp,
-        tickangle=25,
+        tickangle=20,
         range=[x_positions[0] - 0.8, x_positions[-1] + 0.8],
         automargin=True,
     )

@@ -336,7 +336,7 @@ def render_country_content(dff, map_df, metric, selected_country):
         compact=True,
     )
 
-    fig_trend, fig_age, fig_sex, fig_bp_cat = make_country_figures(country_df)
+    fig_trend, fig_bp_cat, fig_diabetes = make_country_figures(country_df)
 
     graph_config = {
         "displayModeBar": False,
@@ -382,30 +382,24 @@ def render_country_content(dff, map_df, metric, selected_country):
 
             html.Div(
                 [
-                    html.H3("Specific plots", className="panel-title"),
+                    html.H3("Country blood pressure insights", className="panel-title"),
 
                     html.Div(
                         [
                             dcc.Graph(
                                 figure=fig_trend,
                                 config=graph_config,
-                                className="plot-card",
-                                style=graph_style,
-                            ),
-                            dcc.Graph(
-                                figure=fig_age,
-                                config=graph_config,
-                                className="plot-card",
-                                style=graph_style,
-                            ),
-                            dcc.Graph(
-                                figure=fig_sex,
-                                config=graph_config,
-                                className="plot-card",
+                                className="plot-card plot-card-wide",
                                 style=graph_style,
                             ),
                             dcc.Graph(
                                 figure=fig_bp_cat,
+                                config=graph_config,
+                                className="plot-card",
+                                style=graph_style,
+                            ),
+                            dcc.Graph(
+                                figure=fig_diabetes,
                                 config=graph_config,
                                 className="plot-card",
                                 style=graph_style,
