@@ -65,22 +65,24 @@
                Main dashboard shell
             ========================= */
             .dashboard-shell {
-                display: grid;
-                grid-template-columns: 270px minmax(0, 1fr);
-                gap: 16px;
-                align-items: stretch;
-                overflow: visible;
+            display: grid;
+            grid-template-columns: 270px minmax(0, 1fr);
+            gap: 16px;
+            align-items: stretch;
+            overflow: visible;
             }
 
             .content-panel {
                 min-width: 0;
                 width: 100%;
+                height: 100%;
                 position: relative;
                 z-index: 1;
             }
 
             #main-content {
                 width: 100%;
+                height: 100%;
                 position: relative;
                 z-index: 1;
             }
@@ -91,10 +93,24 @@
             .filters-panel {
                 padding: 20px;
                 height: 100%;
-                min-height: 100%;
-                overflow-y: visible;
-                position: relative;
-                z-index: 30;
+                min-height: 0;
+                box-sizing: border-box;
+
+                display: flex;
+                flex-direction: column;
+            }
+
+            .filters-panel .panel-title {
+                flex-shrink: 0;
+                margin: 0 0 16px;
+            }
+
+            /* this part gets vertically centered */
+            .filters-body {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
             .filters-panel label {
@@ -249,19 +265,29 @@
             ========================= */
             .overview-layout {
                 display: grid;
-                grid-template-columns: minmax(0, 2.5fr) minmax(380px, 1fr);
+
+                /* makes the map side wider */
+                grid-template-columns: minmax(0, 3.1fr) minmax(360px, 1fr);
+
                 gap: 16px;
-                align-items: start;
+                align-items: stretch;
                 width: 100%;
+                height: 100%;
+                min-height: 100%;
                 position: relative;
                 z-index: 1;
             }
 
             .overview-left-column {
                 display: grid;
-                grid-template-rows: auto auto;
+
+                /* map takes all remaining height, active filters stays at bottom */
+                grid-template-rows: minmax(0, 1fr) auto;
+
                 gap: 16px;
                 min-width: 0;
+                height: 100%;
+                min-height: 0;
                 position: relative;
                 z-index: 1;
             }
@@ -269,13 +295,18 @@
             .overview-map-wrap {
                 padding: 18px 22px 26px;
                 min-width: 0;
-                height: 640px;
+
+                /* remove fixed height so it can stretch down */
+                height: auto;
+                min-height: 0;
+
                 display: flex;
-                align-items: center;
-                justify-content: center;
+                align-items: stretch;
+                justify-content: stretch;
                 position: relative;
                 z-index: 1;
             }
+
 
             .overview-info-wrap,
             .overview-note-wrap,
@@ -286,9 +317,16 @@
 
             .overview-right-column {
                 display: grid;
-                grid-template-rows: auto auto;
+                grid-template-rows: auto 1fr;
                 gap: 16px;
                 min-width: 0;
+                height: 100%;
+            }
+            
+            .active-filters-wrap {
+                padding: 18px;
+                min-width: 0;
+                min-height: 110px;
             }
 
             .overview-note-wrap {
@@ -361,8 +399,22 @@
                 z-index: 1 !important;
             }
 
-            .plot-card {
-                min-height: 400px;
+            .overview-map-wrap {
+                height: 100%;
+                min-height: 0;
+            }
+
+            .overview-map-wrap .dash-graph,
+            .overview-map-wrap .js-plotly-plot,
+            .overview-map-wrap .plot-container,
+            .overview-map-wrap .svg-container {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            .overview-map-wrap .main-svg {
+                width: 100% !important;
+                height: 100% !important;
             }
 
             /* =========================
@@ -465,22 +517,22 @@
             }
 
             /* =========================
-               Country layout
+            Country layout
             ========================= */
             .country-layout {
                 display: grid;
                 grid-template-columns: minmax(430px, 0.95fr) minmax(760px, 1.85fr);
                 gap: 16px;
-                align-items: stretch;
+                align-items: start;
                 width: 100%;
-                height: 100%;
+                min-height: 0;
             }
 
             .country-left-column {
                 display: grid;
-                grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+                grid-template-rows: auto auto;
                 gap: 16px;
-                height: 100%;
+                min-width: 0;
                 min-height: 0;
             }
 
@@ -489,7 +541,7 @@
             .country-plots-wrap {
                 min-width: 0;
                 min-height: 0;
-                height: 100%;
+                height: auto;
                 padding: 18px;
             }
 
@@ -505,18 +557,257 @@
                 justify-content: flex-start;
             }
 
+            .plots-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+                align-items: start;
+            }
+
+            .plot-card .js-plotly-plot,
+            .plot-card .plot-container,
+            .plot-card .svg-container {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+
+            /* =========================
+            Stable one-screen layout fix
+            ========================= */
+
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .page {
+                height: 100dvh;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .header {
+                flex: 0 0 auto;
+            }
+
+            .dashboard-shell {
+                flex: 1 1 auto;
+                min-height: 0;
+                height: auto;
+                display: grid;
+                grid-template-columns: 270px minmax(0, 1fr);
+                gap: 16px;
+                align-items: stretch;
+                overflow: hidden;
+            }
+
+            .content-panel,
+            #main-content {
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                min-width: 0;
+                overflow: hidden;
+            }
+
+            /* =========================
+            Filter panel: title top, controls centered
+            ========================= */
+
+            .filters-panel {
+                height: 100%;
+                min-height: 0;
+                padding: 20px;
+                box-sizing: border-box;
+                overflow: hidden;
+
+                display: flex;
+                flex-direction: column;
+            }
+
+            .filters-panel .panel-title {
+                flex: 0 0 auto;
+                margin: 0 0 16px;
+            }
+
+            .filters-body {
+                flex: 1 1 auto;
+                min-height: 0;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            /* If the screen is short, scroll only inside the filter body */
+            @media (max-height: 850px) {
+                .filters-body {
+                    justify-content: flex-start;
+                    overflow-y: auto;
+                    padding-right: 4px;
+                }
+            }
+
+            /* =========================
+            Overview screen
+            ========================= */
+
+            .overview-layout {
+                display: grid;
+                grid-template-columns: minmax(0, 3.1fr) minmax(360px, 1fr);
+                gap: 16px;
+                align-items: stretch;
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .overview-left-column {
+                display: grid;
+                grid-template-rows: minmax(0, 1fr) 110px;
+                gap: 16px;
+                min-width: 0;
+                height: 100%;
+                min-height: 0;
+            }
+
+            .overview-map-wrap {
+                padding: 18px 22px 26px;
+                min-width: 0;
+                min-height: 0;
+                height: 100%;
+                display: flex;
+                align-items: stretch;
+                justify-content: stretch;
+                overflow: hidden;
+            }
+
+            .active-filters-wrap {
+                height: 110px;
+                min-height: 110px;
+                padding: 18px;
+                overflow-y: auto;
+            }
+
+            .overview-right-column {
+                display: grid;
+                grid-template-rows: auto minmax(0, 1fr);
+                gap: 16px;
+                min-width: 0;
+                height: 100%;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .overview-info-wrap {
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .overview-note-wrap {
+                min-height: 0;
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            /* =========================
+            Country selected screen
+            ========================= */
+
+            .country-layout {
+                display: grid;
+                grid-template-columns: minmax(430px, 0.95fr) minmax(760px, 1.85fr);
+                gap: 16px;
+                align-items: stretch;
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .country-left-column {
+                display: grid;
+                grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 16px;
+                height: 100%;
+                min-height: 0;
+                min-width: 0;
+            }
+
+            .country-map-wrap,
+            .country-info-wrap,
+            .country-plots-wrap {
+                min-width: 0;
+                min-height: 0;
+                height: 100%;
+                padding: 18px;
+                overflow: hidden;
+            }
+
+            .country-map-wrap {
+                display: flex;
+                align-items: stretch;
+                justify-content: stretch;
+            }
+
+            .country-info-wrap {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
             .country-plots-wrap {
                 display: flex;
                 flex-direction: column;
             }
 
             .plots-grid {
+                flex: 1 1 auto;
+                min-height: 0;
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-rows: repeat(2, minmax(0, 1fr));
                 gap: 14px;
-                flex: 1;
-                align-content: stretch;
+                overflow: hidden;
             }
+
+            .plot-card {
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+            }
+
+            /* =========================
+            Plotly sizing
+            ========================= */
+
+            .graph-fill,
+            .dash-graph {
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+            }
+
+            .overview-map-wrap .dash-graph,
+            .overview-map-wrap .js-plotly-plot,
+            .overview-map-wrap .plot-container,
+            .overview-map-wrap .svg-container,
+            .country-map-wrap .dash-graph,
+            .country-map-wrap .js-plotly-plot,
+            .country-map-wrap .plot-container,
+            .country-map-wrap .svg-container,
+            .plot-card .js-plotly-plot,
+            .plot-card .plot-container,
+            .plot-card .svg-container {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
 
             /* =========================
                Responsive

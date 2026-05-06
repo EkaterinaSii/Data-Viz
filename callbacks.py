@@ -280,7 +280,10 @@ def render_overview_content(
                                 "Overall dataset information",
                                 className="panel-title",
                             ),
-                            html.Div(info_cards_for_df(dff), className="stats-grid"),
+                            html.Div(
+                                info_cards_for_df(dff),
+                                className="stats-grid",
+                            ),
                             html.Div(
                                 [
                                     html.H4("Top 5 countries by selected metric"),
@@ -335,6 +338,16 @@ def render_country_content(dff, map_df, metric, selected_country):
 
     fig_trend, fig_age, fig_sex, fig_bp_cat = make_country_figures(country_df)
 
+    graph_config = {
+        "displayModeBar": False,
+        "responsive": True,
+    }
+
+    graph_style = {
+        "height": "100%",
+        "width": "100%",
+    }
+
     return html.Div(
         [
             html.Div(
@@ -343,15 +356,13 @@ def render_country_content(dff, map_df, metric, selected_country):
                         dcc.Graph(
                             id={"type": "dynamic-map", "index": "main"},
                             figure=map_fig,
-                            config={
-                                "displayModeBar": False,
-                                "responsive": True,
-                            },
+                            config=graph_config,
                             className="graph-fill",
-                            style={"height": "100%", "width": "100%"},
+                            style=graph_style,
                         ),
                         className="country-map-wrap",
                     ),
+
                     html.Div(
                         [
                             html.H3(
@@ -372,39 +383,32 @@ def render_country_content(dff, map_df, metric, selected_country):
             html.Div(
                 [
                     html.H3("Specific plots", className="panel-title"),
+
                     html.Div(
                         [
                             dcc.Graph(
                                 figure=fig_trend,
-                                config={
-                                    "displayModeBar": False,
-                                    "responsive": True,
-                                },
+                                config=graph_config,
                                 className="plot-card",
+                                style=graph_style,
                             ),
                             dcc.Graph(
                                 figure=fig_age,
-                                config={
-                                    "displayModeBar": False,
-                                    "responsive": True,
-                                },
+                                config=graph_config,
                                 className="plot-card",
+                                style=graph_style,
                             ),
                             dcc.Graph(
                                 figure=fig_sex,
-                                config={
-                                    "displayModeBar": False,
-                                    "responsive": True,
-                                },
+                                config=graph_config,
                                 className="plot-card",
+                                style=graph_style,
                             ),
                             dcc.Graph(
                                 figure=fig_bp_cat,
-                                config={
-                                    "displayModeBar": False,
-                                    "responsive": True,
-                                },
+                                config=graph_config,
                                 className="plot-card",
+                                style=graph_style,
                             ),
                         ],
                         className="plots-grid",

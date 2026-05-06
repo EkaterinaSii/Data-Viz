@@ -7,11 +7,13 @@ import plotly.graph_objects as go
 from config import MAP_METRICS, TEAL_SCALE
 
 
-def empty_figure(message: str, height: int = 320):
+def empty_figure(message: str):
     fig = go.Figure()
 
     fig.update_layout(
         template="plotly_white",
+        autosize=True,
+        height=None,
         annotations=[
             {
                 "text": message,
@@ -24,7 +26,6 @@ def empty_figure(message: str, height: int = 320):
             }
         ],
         margin=dict(l=10, r=10, t=40, b=10),
-        height=height,
     )
 
     return fig
@@ -41,6 +42,8 @@ def make_map(
 
         fig.update_layout(
             template="plotly_white",
+            autosize=True,
+            height=None,
             annotations=[
                 {
                     "text": "No data available for the selected filters",
@@ -53,7 +56,6 @@ def make_map(
                 }
             ],
             margin=dict(l=0, r=0, t=50, b=0),
-            height=280 if compact else 680,
         )
 
         return fig
@@ -109,20 +111,21 @@ def make_map(
             showcountries=True,
             countrycolor="white",
             bgcolor="rgba(0,0,0,0)",
-            domain=dict(x=[0, 1], y=[0.10, 0.90]),
-            projection_scale=1.18,
+            domain=dict(x=[0, 1], y=[0.02, 0.96]),
+            projection_scale=1.28,
             lataxis_range=[-58, 85],
             lonaxis_range=[-180, 180],
         )
 
     fig.update_layout(
         template="plotly_white",
+        autosize=True,
+        height=None,
         margin=dict(l=0, r=0, t=45, b=0),
-        height=440 if compact else 720,
         coloraxis_colorbar=dict(
             title=MAP_METRICS.get(metric, metric),
-            len=0.62,
-            y=0.5,
+            len=0.50,
+            y=0.50,
         ),
         title=dict(
             text=(
@@ -162,10 +165,22 @@ def make_country_figures(country_df: pd.DataFrame):
 
     fig_trend.update_layout(
         template="plotly_white",
-        margin=dict(l=10, r=10, t=40, b=10),
+        autosize=True,
+        height=None,
+        margin=dict(l=10, r=10, t=40, b=35),
         legend_title_text="Metric",
-        height=340,
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="right",
+            x=1,
+            font=dict(size=10),
+        ),
     )
+
+    fig_trend.update_xaxes(automargin=True)
+    fig_trend.update_yaxes(automargin=True)
 
     age_bp = (
         country_df.groupby("Age_Group", as_index=False)[
@@ -185,10 +200,22 @@ def make_country_figures(country_df: pd.DataFrame):
 
     fig_age.update_layout(
         template="plotly_white",
-        margin=dict(l=10, r=10, t=40, b=10),
+        autosize=True,
+        height=None,
+        margin=dict(l=10, r=10, t=40, b=80),
         legend_title_text="Metric",
-        height=420,
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="right",
+            x=1,
+            font=dict(size=10),
+        ),
     )
+
+    fig_age.update_xaxes(tickangle=35, automargin=True)
+    fig_age.update_yaxes(automargin=True)
 
     fig_sex = px.box(
         country_df,
@@ -201,10 +228,14 @@ def make_country_figures(country_df: pd.DataFrame):
 
     fig_sex.update_layout(
         template="plotly_white",
-        margin=dict(l=10, r=10, t=40, b=10),
+        autosize=True,
+        height=None,
+        margin=dict(l=10, r=10, t=40, b=45),
         showlegend=False,
-        height=420,
     )
+
+    fig_sex.update_xaxes(automargin=True)
+    fig_sex.update_yaxes(automargin=True)
 
     fig_bp_cat = make_bp_category_figure(country_df)
 
@@ -227,7 +258,7 @@ def make_bp_category_figure(country_df: pd.DataFrame):
     ]
 
     if not existing_bp:
-        return empty_figure("No BP category data available.", height=420)
+        return empty_figure("No BP category data available.")
 
     total_counts = (
         country_df.groupby("BP_Category_2")
@@ -309,20 +340,33 @@ def make_bp_category_figure(country_df: pd.DataFrame):
 
     fig.update_layout(
         template="plotly_white",
+        autosize=True,
+        height=None,
         barmode="overlay",
         title="People count by BP category and age group",
         xaxis_title="Blood pressure category",
         yaxis_title="People count",
-        margin=dict(l=10, r=10, t=50, b=60),
-        height=420,
+        margin=dict(l=10, r=10, t=50, b=80),
         legend_title_text="Age group",
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="right",
+            x=1,
+            font=dict(size=9),
+        ),
     )
 
     fig.update_xaxes(
         tickmode="array",
         tickvals=x_positions,
         ticktext=existing_bp,
+        tickangle=25,
         range=[x_positions[0] - 0.8, x_positions[-1] + 0.8],
+        automargin=True,
     )
+
+    fig.update_yaxes(automargin=True)
 
     return fig
