@@ -1,0 +1,576 @@
+            /* =========================
+               Base
+            ========================= */
+            html, body {
+                margin: 0;
+                min-height: 100%;
+                font-family: Arial, Helvetica, sans-serif;
+                background: #2F4F4F;
+                color: #142426;
+            }
+
+            body {
+                overflow-x: hidden;
+            }
+
+            .page {
+                padding: 16px;
+                min-height: 100vh;
+                box-sizing: border-box;
+            }
+
+            .header {
+                background: white;
+                border: 1px solid #d9eceb;
+                border-radius: 16px;
+                padding: 18px 22px;
+                margin-bottom: 16px;
+                box-shadow: 0 4px 14px rgba(8, 62, 61, 0.06);
+            }
+
+            .page-title {
+                margin: 0;
+                color: #0b5f60;
+            }
+
+            .page-subtitle {
+                margin: 8px 0 0;
+                color: #476466;
+            }
+
+            .panel-title {
+                margin: 0 0 16px;
+                color: #0b5f60;
+            }
+
+            /* =========================
+               Shared white card style
+            ========================= */
+            .filters-panel,
+            .overview-map-wrap,
+            .overview-info-wrap,
+            .overview-note-wrap,
+            .active-filters-wrap,
+            .country-map-wrap,
+            .country-info-wrap,
+            .country-plots-wrap {
+                background: white;
+                border: 1px solid #d9eceb;
+                border-radius: 16px;
+                box-shadow: 0 4px 14px rgba(8, 62, 61, 0.06);
+                box-sizing: border-box;
+            }
+
+            /* =========================
+               Main dashboard shell
+            ========================= */
+            .dashboard-shell {
+                display: grid;
+                grid-template-columns: 270px minmax(0, 1fr);
+                gap: 16px;
+                align-items: stretch;
+                overflow: visible;
+            }
+
+            .content-panel {
+                min-width: 0;
+                width: 100%;
+                position: relative;
+                z-index: 1;
+            }
+
+            #main-content {
+                width: 100%;
+                position: relative;
+                z-index: 1;
+            }
+
+            /* =========================
+               Filters panel
+            ========================= */
+            .filters-panel {
+                padding: 20px;
+                height: 100%;
+                min-height: 100%;
+                overflow-y: visible;
+                position: relative;
+                z-index: 30;
+            }
+
+            .filters-panel label {
+                display: block;
+                font-size: 15px;
+                font-weight: 700;
+                margin: 14px 0 8px;
+                color: #234244;
+            }
+
+            /* Dash dropdown sizing */
+            .filters-panel .Select-control,
+            .filters-panel .Select-placeholder,
+            .filters-panel .Select-value-label,
+            .filters-panel .Select-input > input {
+                font-size: 14px !important;
+            }
+
+            .filters-panel .VirtualizedSelectOption,
+            .filters-panel .Select-option {
+                font-size: 14px !important;
+            }
+
+            .filters-panel .Select-control {
+                min-height: 38px;
+            }
+
+            .filters-panel .Select-placeholder,
+            .filters-panel .Select-value {
+                line-height: 38px;
+            }
+
+            /* Make dropdown menu appear above Plotly graph */
+            .filters-panel .Select {
+                position: relative;
+                z-index: 4000;
+            }
+
+            .filters-panel .Select-menu-outer {
+                z-index: 5000 !important;
+            }
+
+            .filters-panel .VirtualizedSelectOption,
+            .filters-panel .Select-option {
+                z-index: 5000 !important;
+            }
+
+            .reset-btn {
+                width: 100%;
+                margin-top: 16px;
+                background: #0b5f60;
+                color: white;
+                border: 0;
+                border-radius: 10px;
+                padding: 12px 14px;
+                cursor: pointer;
+                font-weight: 700;
+                font-size: 17px;
+            }
+
+            /* =========================
+               Filter toggle buttons
+            ========================= */
+            .sex-toggle-row {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                margin-top: 6px;
+            }
+
+            .sex-btn {
+                flex: 1;
+                background: #f8fdfd;
+                border: 1px solid #cfe5e4;
+                border-radius: 12px;
+                padding: 12px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 64px;
+                transition: 0.2s ease;
+            }
+
+            .sex-btn:hover {
+                background: #eef8f8;
+                border-color: #9ed0cd;
+            }
+
+            .sex-btn.active {
+                background: #dff2f1;
+                border: 2px solid #0b5f60;
+            }
+
+            .sex-icon {
+                width: 48px;
+                height: 48px;
+                object-fit: contain;
+            }
+
+            .smoking-toggle-row {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 4px;
+            }
+
+            .smoking-btn {
+                width: 100%;
+                background: #f8fdfd;
+                border: 1px solid #cfe5e4;
+                border-radius: 12px;
+                padding: 12px 10px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 12px;
+                transition: 0.2s ease;
+                text-align: left;
+                min-height: 56px;
+            }
+
+            .smoking-btn:hover {
+                background: #eef8f8;
+                border-color: #9ed0cd;
+            }
+
+            .smoking-btn.active {
+                background: #dff2f1;
+                border: 2px solid #0b5f60;
+            }
+
+            .smoking-icon {
+                width: 38px;
+                height: 38px;
+                object-fit: contain;
+                flex-shrink: 0;
+            }
+
+            .smoking-btn-label {
+                font-size: 15px;
+                font-weight: 700;
+                color: #234244;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+
+            /* =========================
+               Overview layout
+            ========================= */
+            .overview-layout {
+                display: grid;
+                grid-template-columns: minmax(0, 2.5fr) minmax(380px, 1fr);
+                gap: 16px;
+                align-items: start;
+                width: 100%;
+                position: relative;
+                z-index: 1;
+            }
+
+            .overview-left-column {
+                display: grid;
+                grid-template-rows: auto auto;
+                gap: 16px;
+                min-width: 0;
+                position: relative;
+                z-index: 1;
+            }
+
+            .overview-map-wrap {
+                padding: 18px 22px 26px;
+                min-width: 0;
+                height: 640px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                z-index: 1;
+            }
+
+            .overview-info-wrap,
+            .overview-note-wrap,
+            .active-filters-wrap {
+                padding: 18px;
+                min-width: 0;
+            }
+
+            .overview-right-column {
+                display: grid;
+                grid-template-rows: auto auto;
+                gap: 16px;
+                min-width: 0;
+            }
+
+            .overview-note-wrap {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .overview-note-wrap .panel-title {
+                margin: 0 0 18px;
+                color: #0b5f60;
+                font-size: 22px;
+                text-align: center;
+            }
+
+            .overview-note-text {
+                margin: 0;
+                color: #335456;
+                font-size: 17px;
+                line-height: 1.7;
+                text-align: center;
+            }
+
+            /* =========================
+               Active filters box
+            ========================= */
+            .active-filters-wrap {
+                min-height: 110px;
+            }
+
+            .active-filters-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .filter-chip {
+                display: inline-flex;
+                align-items: center;
+                padding: 8px 14px;
+                border-radius: 999px;
+                background: #dff2f1;
+                color: #0b5f60;
+                border: 1px solid #9ed0cd;
+                font-size: 14px;
+                font-weight: 700;
+                line-height: 1.2;
+            }
+
+            .active-filters-empty {
+                color: #527173;
+                font-size: 14px;
+            }
+
+            /* =========================
+               Graphs and Plotly
+            ========================= */
+            .graph-fill {
+                width: 100%;
+                height: 100%;
+                position: relative;
+                z-index: 1;
+            }
+
+            .js-plotly-plot,
+            .plot-container,
+            .svg-container {
+                z-index: 1 !important;
+            }
+
+            .plot-card {
+                min-height: 400px;
+            }
+
+            /* =========================
+               Stats / cards / table
+            ========================= */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .country-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .stat-card {
+                border: 1px solid #d9eceb;
+                border-radius: 12px;
+                padding: 12px;
+                background: #f8fdfd;
+            }
+
+            .stat-label {
+                font-size: 12px;
+                color: #527173;
+                margin-bottom: 5px;
+            }
+
+            .stat-label-row {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            .stat-value {
+                font-size: 18px;
+                font-weight: 700;
+                color: #163234;
+            }
+
+            .datatable-wrap {
+                margin-top: 16px;
+            }
+
+            .info-empty {
+                padding: 14px;
+                border: 1px dashed #b8d7d5;
+                border-radius: 12px;
+                color: #476466;
+                background: #fbffff;
+            }
+
+            /* =========================
+               Help tooltip
+            ========================= */
+            .help-tooltip-wrap {
+                position: relative;
+                display: inline-block;
+                vertical-align: middle;
+            }
+
+            .help-icon-mark {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: #dff2f1;
+                color: #0b5f60;
+                font-size: 11px;
+                font-weight: 700;
+                cursor: help;
+                border: 1px solid #9ed0cd;
+                line-height: 1;
+            }
+
+            .help-tooltip-box {
+                display: none;
+                position: absolute;
+                top: 24px;
+                right: 0;
+                width: 460px;
+                max-width: min(460px, 90vw);
+                background: #163234;
+                color: white;
+                padding: 18px 20px;
+                border-radius: 14px;
+                font-size: 16px;
+                line-height: 1.4;
+                box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+                z-index: 9999;
+                text-align: left;
+                word-break: break-word;
+            }
+
+            .help-tooltip-wrap:hover .help-tooltip-box {
+                display: block;
+            }
+
+            /* =========================
+               Country layout
+            ========================= */
+            .country-layout {
+                display: grid;
+                grid-template-columns: minmax(430px, 0.95fr) minmax(760px, 1.85fr);
+                gap: 16px;
+                align-items: stretch;
+                width: 100%;
+                height: 100%;
+            }
+
+            .country-left-column {
+                display: grid;
+                grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 16px;
+                height: 100%;
+                min-height: 0;
+            }
+
+            .country-map-wrap,
+            .country-info-wrap,
+            .country-plots-wrap {
+                min-width: 0;
+                min-height: 0;
+                height: 100%;
+                padding: 18px;
+            }
+
+            .country-map-wrap {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .country-info-wrap {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .country-plots-wrap {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .plots-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+                flex: 1;
+                align-content: stretch;
+            }
+
+            /* =========================
+               Responsive
+            ========================= */
+            @media (max-width: 1400px) {
+                .overview-layout {
+                    grid-template-columns: minmax(0, 1.9fr) minmax(340px, 1fr);
+                }
+            }
+
+            @media (max-width: 1200px) {
+                .overview-layout,
+                .country-layout,
+                .dashboard-shell {
+                    grid-template-columns: 1fr;
+                }
+
+                .country-left-column {
+                    grid-template-rows: auto auto;
+                    min-height: auto;
+                }
+
+                .country-plots-wrap,
+                .country-layout {
+                    min-height: auto;
+                }
+
+                .filters-panel {
+                    position: static;
+                    max-height: none;
+                    overflow-y: visible;
+                }
+
+                .overview-map-wrap {
+                    height: auto;
+                    min-height: 520px;
+                }
+            }
+
+            @media (max-width: 900px) {
+                .plots-grid,
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .page {
+                    padding: 10px;
+                }
+
+                .overview-note-text {
+                    font-size: 16px;
+                }
+
+                .overview-note-wrap .panel-title {
+                    font-size: 20px;
+                }
+            }
