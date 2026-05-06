@@ -353,22 +353,38 @@
             }
 
             /* =========================
-               Active filters box
+            Active filters box
             ========================= */
             .active-filters-wrap {
-                min-height: 110px;
+                min-height: 76px;
+                height: auto;
+                padding: 12px 16px;
+                overflow: visible;
+            }
+
+            .active-filters-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+
+            .active-filters-header .panel-title {
+                margin: 0;
             }
 
             .active-filters-chips {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 10px;
+                gap: 8px;
             }
 
             .filter-chip {
                 display: inline-flex;
                 align-items: center;
-                padding: 8px 14px;
+                gap: 4px;
+                padding: 7px 12px;
                 border-radius: 999px;
                 background: #dff2f1;
                 color: #0b5f60;
@@ -376,6 +392,34 @@
                 font-size: 14px;
                 font-weight: 700;
                 line-height: 1.2;
+                cursor: pointer;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .filter-chip:hover {
+                background: #cbe9e7;
+                border-color: #0b5f60;
+            }
+
+            .filter-chip-x {
+                font-size: 15px;
+                font-weight: 900;
+            }
+
+            .remove-all-filters-btn {
+                background: #0b5f60;
+                color: white;
+                border: 0;
+                border-radius: 999px;
+                padding: 7px 12px;
+                cursor: pointer;
+                font-weight: 700;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .remove-all-filters-btn:hover {
+                background: #084b4c;
             }
 
             .active-filters-empty {
@@ -669,7 +713,7 @@
 
             .overview-left-column {
                 display: grid;
-                grid-template-rows: minmax(0, 1fr) 110px;
+                grid-template-rows: minmax(0, 1fr) auto;
                 gap: 16px;
                 min-width: 0;
                 height: 100%;
@@ -688,10 +732,8 @@
             }
 
             .active-filters-wrap {
-                height: 110px;
                 min-height: 110px;
                 padding: 18px;
-                overflow-y: auto;
             }
 
             .overview-right-column {

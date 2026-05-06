@@ -233,53 +233,74 @@ def build_active_filters_box(
 ):
     chips = []
 
-    if selected_country:
-        chips.append(f"Country: {selected_country}")
+    # Always show map metric
+    chips.append(("metric", f"Metric: {MAP_METRICS.get(metric, metric)}"))
 
-    if metric:
-        chips.append(f"Metric: {MAP_METRICS.get(metric, metric)}")
+    if selected_country:
+        chips.append(("country", f"Country: {selected_country}"))
 
     if year_range and (year_range[0] != year_min or year_range[1] != year_max):
-        chips.append(f"Years: {year_range[0]}–{year_range[1]}")
+        chips.append(("year", f"Years: {year_range[0]}–{year_range[1]}"))
 
     if sex:
-        chips.append(f"Sex: {sex}")
+        chips.append(("sex", f"Sex: {sex}"))
 
     if age_group:
-        chips.append(f"Age group: {age_group}")
+        chips.append(("age_group", f"Age group: {age_group}"))
 
     if bmi_category:
-        chips.append(f"BMI: {bmi_category}")
+        chips.append(("bmi_category", f"BMI: {bmi_category}"))
 
     if smoking:
-        chips.append(f"Smoking: {smoking}")
+        chips.append(("smoking", f"Smoking: {smoking}"))
 
     if physical:
-        chips.append(f"Physical activity: {physical}")
+        chips.append(("physical", f"Physical activity: {physical}"))
 
     if salt:
-        chips.append(f"Salt intake: {salt}")
+        chips.append(("salt", f"Salt intake: {salt}"))
 
     if stress:
-        chips.append(f"Stress: {stress}")
+        chips.append(("stress", f"Stress: {stress}"))
 
     if diabetes:
-        chips.append(f"Diabetes: {diabetes}")
+        chips.append(("diabetes", f"Diabetes: {diabetes}"))
 
     if family_hx:
-        chips.append(f"Family history: {family_hx}")
+        chips.append(("family_hx", f"Family history: {family_hx}"))
 
-    if not chips:
-        content = html.Div("No active filters selected.", className="active-filters-empty")
-    else:
-        content = html.Div(
-            [html.Span(chip, className="filter-chip") for chip in chips],
-            className="active-filters-chips",
-        )
+    content = html.Div(
+        [
+            html.Button(
+                [
+                    html.Span(label),
+                    html.Span(" ×", className="filter-chip-x"),
+                ],
+                id={"type": "remove-filter-chip", "filter": filter_key},
+                n_clicks=0,
+                className="filter-chip",
+            )
+            for filter_key, label in chips
+        ],
+        className="active-filters-chips",
+    )
+
+    remove_all = html.Button(
+        "Remove all",
+        id="remove-all-filters-btn",
+        n_clicks=0,
+        className="remove-all-filters-btn",
+    )
 
     return html.Div(
         [
-            html.H3("Active filters", className="panel-title"),
+            html.Div(
+                [
+                    html.H3("Active filters", className="panel-title"),
+                    remove_all,
+                ],
+                className="active-filters-header",
+            ),
             content,
         ],
         className="active-filters-wrap",

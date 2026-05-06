@@ -1,4 +1,4 @@
-from dash import Input, Output, State, ctx, dcc, html, dash_table
+from dash import Input, Output, State, ctx, dcc, html, dash_table, ALL, no_update
 
 from config import MAP_METRICS
 from components import (
@@ -92,6 +92,141 @@ def register_callbacks(app, df, year_min: int, year_max: int):
             return None if current_sex == "Female" else "Female"
 
         return current_sex
+
+    @app.callback(
+        Output("metric-dropdown", "value"),
+        Output("year-range", "value"),
+        Output("selected-sex", "data", allow_duplicate=True),
+        Output("age-group-dropdown", "value"),
+        Output("bmi-category-dropdown", "value"),
+        Output("selected-smoking", "data", allow_duplicate=True),
+        Output("physical-dropdown", "value"),
+        Output("salt-dropdown", "value"),
+        Output("stress-dropdown", "value"),
+        Output("diabetes-dropdown", "value"),
+        Output("family-dropdown", "value"),
+        Output("selected-country", "data", allow_duplicate=True),
+        Input("remove-all-filters-btn", "n_clicks"),
+        Input({"type": "remove-filter-chip", "filter": ALL}, "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def clear_filters(remove_all_clicks, chip_clicks):
+        trigger = ctx.triggered_id
+
+        default_metric = "Country_HTN_Prevalence_pct"
+        default_year_range = [year_min, year_max]
+
+        no_changes = (
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+        )
+
+        # IMPORTANT:
+        # Dash may trigger this callback when chips are created/re-rendered.
+        # Only continue if the actual clicked value is > 0.
+        triggered_value = None
+        if ctx.triggered:
+            triggered_value = ctx.triggered[0].get("value")
+
+        if not triggered_value:
+            return no_changes
+
+        # Remove all filters
+        if trigger == "remove-all-filters-btn":
+            return (
+                default_metric,
+                default_year_range,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+
+        # Remove one clicked filter chip
+        if isinstance(trigger, dict):
+            filter_key = trigger.get("filter")
+
+            metric_value = no_update
+            year_value = no_update
+            sex_value = no_update
+            age_group_value = no_update
+            bmi_category_value = no_update
+            smoking_value = no_update
+            physical_value = no_update
+            salt_value = no_update
+            stress_value = no_update
+            diabetes_value = no_update
+            family_hx_value = no_update
+            country_value = no_update
+
+            if filter_key == "metric":
+                metric_value = default_metric
+
+            elif filter_key == "year":
+                year_value = default_year_range
+
+            elif filter_key == "sex":
+                sex_value = None
+
+            elif filter_key == "age_group":
+                age_group_value = None
+
+            elif filter_key == "bmi_category":
+                bmi_category_value = None
+
+            elif filter_key == "smoking":
+                smoking_value = None
+
+            elif filter_key == "physical":
+                physical_value = None
+
+            elif filter_key == "salt":
+                salt_value = None
+
+            elif filter_key == "stress":
+                stress_value = None
+
+            elif filter_key == "diabetes":
+                diabetes_value = None
+
+            elif filter_key == "family_hx":
+                family_hx_value = None
+
+            elif filter_key == "country":
+                country_value = None
+
+            return (
+                metric_value,
+                year_value,
+                sex_value,
+                age_group_value,
+                bmi_category_value,
+                smoking_value,
+                physical_value,
+                salt_value,
+                stress_value,
+                diabetes_value,
+                family_hx_value,
+                country_value,
+            )
+
+        return no_changes
 
     @app.callback(
         Output("selected-country", "data"),
@@ -280,10 +415,7 @@ def render_overview_content(
                                 "Overall dataset information",
                                 className="panel-title",
                             ),
-                            html.Div(
-                                info_cards_for_df(dff),
-                                className="stats-grid",
-                            ),
+                            html.Div(info_cards_for_df(dff), className="stats-grid"),
                             html.Div(
                                 [
                                     html.H4("Top 5 countries by selected metric"),
