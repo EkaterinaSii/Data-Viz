@@ -535,12 +535,14 @@
             }
 
             /* =========================
-               Help tooltip
+            Help tooltip
             ========================= */
+
             .help-tooltip-wrap {
                 position: relative;
                 display: inline-block;
                 vertical-align: middle;
+                overflow: visible;
             }
 
             .help-icon-mark {
@@ -557,13 +559,21 @@
                 cursor: help;
                 border: 1px solid #9ed0cd;
                 line-height: 1;
+
+                /* important: do NOT force the ? above everything */
+                position: relative;
+                z-index: auto;
             }
 
             .help-tooltip-box {
                 display: none;
                 position: absolute;
-                top: 24px;
-                right: 0;
+
+                /* place the green box next to the ? */
+                top: 50%;
+                left: 24px;
+                transform: translateY(-50%);
+
                 width: 460px;
                 max-width: min(460px, 90vw);
                 background: #163234;
@@ -573,7 +583,10 @@
                 font-size: 16px;
                 line-height: 1.4;
                 box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
-                z-index: 9999;
+
+                /* only the green info box goes on top */
+                z-index: 99999;
+
                 text-align: left;
                 word-break: break-word;
             }
@@ -581,6 +594,94 @@
             .help-tooltip-wrap:hover .help-tooltip-box {
                 display: block;
             }
+
+            /* Let tooltip cross from the info panel onto the map area */
+            .overview-layout,
+            .overview-right-column,
+            .overview-info-wrap,
+            .stats-grid,
+            .stat-card,
+            .stat-label,
+            .stat-label-row {
+                overflow: visible !important;
+            }
+
+            /* Put the right info panel above the map when tooltip is open */
+            .overview-right-column,
+            .overview-info-wrap {
+                position: relative;
+                z-index: 200;
+            }
+
+            /* Keep map below tooltip */
+            .overview-left-column,
+            .overview-map-wrap {
+                position: relative;
+                z-index: 1;
+            }
+
+            /* Only the green tooltip box should float above everything */
+            .help-tooltip-box {
+                z-index: 999999 !important;
+            }
+
+            /* Make Plotly/map stay lower than tooltip */
+            .overview-map-wrap .js-plotly-plot,
+            .overview-map-wrap .plot-container,
+            .overview-map-wrap .svg-container {
+                z-index: 1 !important;
+            }
+
+            .stats-grid .stat-card:nth-child(even) .help-tooltip-box {
+                left: auto;
+                right: 24px;
+            }
+
+
+            /* =========================
+            Tooltip direction fix
+            ========================= */
+
+            /* Default: tooltip opens to the right */
+            .help-tooltip-box {
+                left: 24px;
+                right: auto;
+            }
+
+            /* In the second column of stat cards, open tooltip to the left */
+            .stats-grid .stat-card:nth-child(even) .help-tooltip-box {
+                left: auto;
+                right: 24px;
+            }
+
+            /* Make sure tooltip can overflow the cards */
+            .overview-info-wrap,
+            .country-info-wrap,
+            .stats-grid,
+            .stat-card,
+            .stat-label,
+            .stat-label-row {
+                overflow: visible !important;
+            }
+
+            .country-info-wrap,
+            .overview-info-wrap,
+            .stat-card,
+            .stats-grid {
+                overflow: visible !important;
+                position: relative;
+            }
+
+            .filters-panel {
+                position: relative;
+                z-index: 10;
+            }
+
+            .country-info-wrap,
+            .overview-info-wrap {
+                z-index: 20;
+            }
+            
 
             /* =========================
             Country layout
@@ -810,7 +911,9 @@
                 min-height: 0;
                 height: 100%;
                 padding: 18px;
-                overflow: hidden;
+                overflow: visible !important;
+                position: relative;
+        ;
             }
 
             .country-map-wrap {
@@ -909,9 +1012,19 @@
                     overflow-y: visible;
                 }
 
+                .filters-panel {
+                    position: relative;
+                    z-index: 10;
+                }
+
                 .overview-map-wrap {
                     height: auto;
                     min-height: 520px;
+                }
+
+                .country-info-wrap,
+                .overview-info-wrap {
+                    z-index: 20;
                 }
             }
 
