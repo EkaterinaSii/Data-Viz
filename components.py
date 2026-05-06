@@ -285,19 +285,11 @@ def build_active_filters_box(
         className="active-filters-chips",
     )
 
-    remove_all = html.Button(
-        "Remove all",
-        id="remove-all-filters-btn",
-        n_clicks=0,
-        className="remove-all-filters-btn",
-    )
-
     return html.Div(
         [
             html.Div(
                 [
                     html.H3("Active filters", className="panel-title"),
-                    remove_all,
                 ],
                 className="active-filters-header",
             ),

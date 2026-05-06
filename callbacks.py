@@ -93,6 +93,8 @@ def register_callbacks(app, df, year_min: int, year_max: int):
 
         return current_sex
 
+    
+
     @app.callback(
         Output("metric-dropdown", "value"),
         Output("year-range", "value"),
@@ -106,11 +108,11 @@ def register_callbacks(app, df, year_min: int, year_max: int):
         Output("diabetes-dropdown", "value"),
         Output("family-dropdown", "value"),
         Output("selected-country", "data", allow_duplicate=True),
-        Input("remove-all-filters-btn", "n_clicks"),
+        Input("clear-filters-btn", "n_clicks"),
         Input({"type": "remove-filter-chip", "filter": ALL}, "n_clicks"),
         prevent_initial_call=True,
     )
-    def clear_filters(remove_all_clicks, chip_clicks):
+    def clear_filters(clear_filters_clicks, chip_clicks):
         trigger = ctx.triggered_id
 
         default_metric = "Country_HTN_Prevalence_pct"
@@ -131,18 +133,12 @@ def register_callbacks(app, df, year_min: int, year_max: int):
             no_update,
         )
 
-        # IMPORTANT:
-        # Dash may trigger this callback when chips are created/re-rendered.
-        # Only continue if the actual clicked value is > 0.
-        triggered_value = None
-        if ctx.triggered:
-            triggered_value = ctx.triggered[0].get("value")
+        # Sidebar clear filters button:
+        # Clears all filters but keeps the current country if one is selected.
+        if trigger == "clear-filters-btn":
+            if not clear_filters_clicks:
+                return no_changes
 
-        if not triggered_value:
-            return no_changes
-
-        # Remove all filters
-        if trigger == "remove-all-filters-btn":
             return (
                 default_metric,
                 default_year_range,
@@ -155,11 +151,20 @@ def register_callbacks(app, df, year_min: int, year_max: int):
                 None,
                 None,
                 None,
-                None,
+                no_update,
             )
 
-        # Remove one clicked filter chip
+        # Active filter chip removal
         if isinstance(trigger, dict):
+            triggered_value = None
+
+            if ctx.triggered:
+                triggered_value = ctx.triggered[0].get("value")
+
+            # Prevent accidental clearing when chips are created or re-rendered
+            if not triggered_value:
+                return no_changes
+
             filter_key = trigger.get("filter")
 
             metric_value = no_update
@@ -229,6 +234,51 @@ def register_callbacks(app, df, year_min: int, year_max: int):
         return no_changes
 
     @app.callback(
+        Output("metric-dropdown", "value", allow_duplicate=True),
+        Output("year-range", "value", allow_duplicate=True),
+        Output("selected-sex", "data", allow_duplicate=True),
+        Output("age-group-dropdown", "value", allow_duplicate=True),
+        Output("bmi-category-dropdown", "value", allow_duplicate=True),
+        Output("selected-smoking", "data", allow_duplicate=True),
+        Output("physical-dropdown", "value", allow_duplicate=True),
+        Output("salt-dropdown", "value", allow_duplicate=True),
+        Output("stress-dropdown", "value", allow_duplicate=True),
+        Output("diabetes-dropdown", "value", allow_duplicate=True),
+        Output("family-dropdown", "value", allow_duplicate=True),
+        Input("selected-country", "data"),
+        prevent_initial_call=True,
+    )
+    def clear_filters_when_country_selected(selected_country):
+        if not selected_country:
+            return (
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+            )
+
+        return (
+            "Country_HTN_Prevalence_pct",
+            [year_min, year_max],
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+
+    @app.callback(
         Output("selected-country", "data"),
         Input("reset-country-btn", "n_clicks"),
         Input("metric-dropdown", "value"),
@@ -271,7 +321,10 @@ def register_callbacks(app, df, year_min: int, year_max: int):
             if click_data and click_data.get("points"):
                 return click_data["points"][0].get("location")
 
-        return current_country
+        # Important:
+        # Do not re-output the current country when normal filters change.
+        # Otherwise the "clear filters when country selected" callback fires again.
+        return no_update
 
     @app.callback(
         Output("main-content", "children"),
@@ -388,18 +441,24 @@ def render_overview_content(
             html.Div(
                 [
                     html.Div(
-                        dcc.Graph(
-                            id={"type": "dynamic-map", "index": "main"},
-                            figure=map_fig,
-                            className="graph-fill",
-                            style={"height": "100%", "width": "100%"},
-                            config={
-                                "displayModeBar": False,
-                                "responsive": True,
-                                "scrollZoom": True,
-                                "staticPlot": False,
-                            },
-                        ),
+                        [
+                            html.H3(
+                                f"Global map: {MAP_METRICS.get(metric, metric)}",
+                                className="panel-title map-panel-title",
+                            ),
+                            dcc.Graph(
+                                id={"type": "dynamic-map", "index": "main"},
+                                figure=map_fig,
+                                className="graph-fill",
+                                style={"height": "100%", "width": "100%"},
+                                config={
+                                    "displayModeBar": False,
+                                    "responsive": True,
+                                    "scrollZoom": True,
+                                    "staticPlot": False,
+                                },
+                            ),
+                        ],
                         className="overview-map-wrap",
                     ),
                     active_filters,
@@ -485,13 +544,19 @@ def render_country_content(dff, map_df, metric, selected_country):
             html.Div(
                 [
                     html.Div(
-                        dcc.Graph(
-                            id={"type": "dynamic-map", "index": "main"},
-                            figure=map_fig,
-                            config=graph_config,
-                            className="graph-fill",
-                            style=graph_style,
-                        ),
+                        [
+                            html.H3(
+                                f"Focused map: {selected_country}",
+                                className="panel-title map-panel-title",
+                            ),
+                            dcc.Graph(
+                                id={"type": "dynamic-map", "index": "main"},
+                                figure=map_fig,
+                                config=graph_config,
+                                className="graph-fill",
+                                style=graph_style,
+                            ),
+                        ],
                         className="country-map-wrap",
                     ),
 

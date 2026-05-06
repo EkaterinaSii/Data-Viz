@@ -117,27 +117,18 @@ def make_map(
             lonaxis_range=[-180, 180],
         )
 
-    fig.update_layout(
-        template="plotly_white",
-        autosize=True,
-        height=None,
-        margin=dict(l=0, r=0, t=45, b=0),
-        coloraxis_colorbar=dict(
-            title=MAP_METRICS.get(metric, metric),
-            len=0.50,
-            y=0.50,
-        ),
-        title=dict(
-            text=(
-                f"Global map: {MAP_METRICS.get(metric, metric)}"
-                if not selected_country
-                else f"Focused map: {selected_country}"
+        fig.update_layout(
+            template="plotly_white",
+            autosize=True,
+            height=None,
+            margin=dict(l=0, r=0, t=10, b=0),
+            coloraxis_colorbar=dict(
+                title=MAP_METRICS.get(metric, metric),
+                len=0.50,
+                y=0.50,
             ),
-            x=0.02,
-            xanchor="left",
-        ),
-        clickmode="event+select",
-    )
+            clickmode="event+select",
+        )
 
     return fig
 

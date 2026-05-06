@@ -209,6 +209,13 @@ def build_filters_panel(df, year_min: int, year_max: int):
                         n_clicks=0,
                         className="reset-btn",
                     ),
+
+                    html.Button(
+                        "Clear filters",
+                        id="clear-filters-btn",
+                        n_clicks=0,
+                        className="clear-filters-btn",
+                    ),
                 ],
                 className="filters-body",
             ),
