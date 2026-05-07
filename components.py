@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 
 import pandas as pd
 from dash import html
@@ -95,7 +95,16 @@ INFO_HELP = {
 }
 
 
-def help_icon(text):
+def help_icon(text: Any):
+    """
+    Builds the small question-mark icon and hover tooltip.
+
+    Parameters:
+    - text: Dash HTML content shown inside the tooltip.
+
+    Returns:
+    - A Dash html.Span containing the icon and tooltip box.
+    """
     return html.Span(
         [
             html.Span("?", className="help-icon-mark"),
@@ -105,7 +114,18 @@ def help_icon(text):
     )
 
 
-def stat_card(label: str, value: str, tooltip=None):
+def stat_card(label: str, value: str, tooltip: Optional[Any] = None):
+    """
+    Builds one statistic card for the dashboard information panels.
+
+    Parameters:
+    - label: Small text label, such as "Avg systolic".
+    - value: Main displayed value, such as "125.8 mmHg".
+    - tooltip: Optional help text shown when hovering over the question mark.
+
+    Returns:
+    - A Dash html.Div styled as a statistic card.
+    """
     label_row = html.Div(
         [
             html.Span(label, className="stat-label-text"),
@@ -123,96 +143,206 @@ def stat_card(label: str, value: str, tooltip=None):
     )
 
 
+def format_mean(
+    df: pd.DataFrame,
+    column: str,
+    suffix: str = "",
+    decimals: int = 1,
+) -> str:
+    """
+    Safely formats the mean value of a numeric dataframe column.
+
+    If the column is missing or contains no valid values, the function
+    returns "N/A" instead of causing an error.
+
+    Parameters:
+    - df: Filtered dataframe.
+    - column: Column name to average.
+    - suffix: Optional unit suffix, such as " mmHg" or "%".
+    - decimals: Number of decimal places.
+
+    Returns:
+    - A formatted string.
+    """
+    if column not in df.columns:
+        return "N/A"
+
+    numeric_values = pd.to_numeric(df[column], errors="coerce")
+
+    if not numeric_values.notna().any():
+        return "N/A"
+
+    return f"{numeric_values.mean():.{decimals}f}{suffix}"
+
+
 def info_cards_for_df(dff: pd.DataFrame, country: Optional[str] = None) -> List:
+    """
+    Builds the overview statistic cards for either the full dataset
+    or one selected country.
+
+    Parameters:
+    - dff: Filtered dataframe.
+    - country: Optional selected country name.
+
+    Returns:
+    - A list of Dash components used inside the stats grid.
+    """
     if dff.empty:
-        return [html.Div("No data for the selected filters.", className="info-empty")]
+        return [
+            html.Div(
+                "No data for the selected filters.",
+                className="info-empty",
+            )
+        ]
 
     title = country if country else "Dataset overview"
 
-    years = (
-        f"{int(dff['Year'].min())}–{int(dff['Year'].max())}"
-        if "Year" in dff.columns and dff["Year"].notna().any()
+    years = "N/A"
+    if "Year" in dff.columns:
+        year_values = pd.to_numeric(dff["Year"], errors="coerce")
+        if year_values.notna().any():
+            years = f"{int(year_values.min())}–{int(year_values.max())}"
+
+    countries = (
+        f"{dff['Country'].nunique():,}"
+        if "Country" in dff.columns
         else "N/A"
     )
 
     return [
         stat_card("Scope", title),
         stat_card("Patients", f"{len(dff):,}"),
-        stat_card(
-            "Countries",
-            f"{dff['Country'].nunique():,}" if "Country" in dff.columns else "N/A",
-        ),
+        stat_card("Countries", countries),
         stat_card("Years", years),
         stat_card(
             "Avg systolic",
-            f"{dff['Systolic_BP_mmHg'].mean():.1f} mmHg"
-            if dff["Systolic_BP_mmHg"].notna().any()
-            else "N/A",
+            format_mean(dff, "Systolic_BP_mmHg", " mmHg"),
             INFO_HELP["Avg systolic"],
         ),
         stat_card(
             "Avg diastolic",
-            f"{dff['Diastolic_BP_mmHg'].mean():.1f} mmHg"
-            if dff["Diastolic_BP_mmHg"].notna().any()
-            else "N/A",
+            format_mean(dff, "Diastolic_BP_mmHg", " mmHg"),
             INFO_HELP["Avg diastolic"],
         ),
         stat_card(
             "Avg MAP",
-            f"{dff['Mean_Arterial_Pressure'].mean():.1f} mmHg"
-            if dff["Mean_Arterial_Pressure"].notna().any()
-            else "N/A",
+            format_mean(dff, "Mean_Arterial_Pressure", " mmHg"),
             INFO_HELP["Avg MAP"],
         ),
         stat_card(
             "Avg pulse pressure",
-            f"{dff['Pulse_Pressure_mmHg'].mean():.1f} mmHg"
-            if dff["Pulse_Pressure_mmHg"].notna().any()
-            else "N/A",
+            format_mean(dff, "Pulse_Pressure_mmHg", " mmHg"),
             INFO_HELP["Avg pulse pressure"],
         ),
         stat_card(
             "Avg heart rate",
-            f"{dff['Heart_Rate_bpm'].mean():.1f} bpm"
-            if dff["Heart_Rate_bpm"].notna().any()
-            else "N/A",
+            format_mean(dff, "Heart_Rate_bpm", " bpm"),
             INFO_HELP["Avg heart rate"],
         ),
         stat_card(
             "HTN prevalence",
-            f"{dff['Country_HTN_Prevalence_pct'].mean():.1f}%"
-            if dff["Country_HTN_Prevalence_pct"].notna().any()
-            else "N/A",
+            format_mean(dff, "Country_HTN_Prevalence_pct", "%"),
             INFO_HELP["HTN prevalence"],
         ),
         stat_card(
             "BMI",
-            f"{dff['BMI'].mean():.1f}" if dff["BMI"].notna().any() else "N/A",
+            format_mean(dff, "BMI"),
             INFO_HELP["BMI"],
         ),
     ]
 
 
 def overview_note():
+    """
+    Builds the explanatory "Why this matters" card for the overview page.
+
+    Returns:
+    - A Dash html.Div containing the project explanation.
+    """
     return html.Div(
         [
             html.H3("Why this matters", className="panel-title"),
-            html.P(
-                "High blood pressure is one of the most important cardiovascular risk factors worldwide. "
-                "It can increase the risk of stroke, heart disease, kidney damage, and other long-term complications. "
-                "Looking at differences across countries and population groups helps reveal where the burden is highest "
-                "and which combinations of factors may be linked to greater risk.\n\n"
-                "This dashboard makes it easier to explore patterns in hypertension prevalence, systolic and diastolic blood pressure, "
-                "pulse pressure, heart rate, BMI, and age. By comparing these measures across sex, age group, smoking status, "
-                "physical activity, salt intake, stress level, diabetes, and family history, users can identify trends that may support "
-                "prevention, early detection, and better public health decision-making.\n\n"
-                "The goal is not only to describe the data, but also to help highlight populations that may benefit most from lifestyle "
-                "interventions, screening programs, and more targeted treatment strategies.",
+            html.Div(
+                [
+                    html.P(
+                        [
+                            "High blood pressure is a major risk factor for serious health problems, including ",
+                            html.B("stroke"),
+                            ", ",
+                            html.B("heart disease"),
+                            ", and ",
+                            html.B("kidney damage"),
+                            ".",
+                        ]
+                    ),
+                    html.P("This dashboard helps users explore:"),
+                    html.Ul(
+                        [
+                            html.Li(html.B("Hypertension prevalence")),
+                            html.Li(html.B("Systolic and diastolic blood pressure")),
+                            html.Li(html.B("Pulse pressure and heart rate")),
+                            html.Li(html.B("BMI and age patterns")),
+                        ]
+                    ),
+                    html.P(
+                        [
+                            "It also compares results across key groups, such as ",
+                            html.B("sex"),
+                            ", ",
+                            html.B("age group"),
+                            ", ",
+                            html.B("smoking status"),
+                            ", ",
+                            html.B("physical activity"),
+                            ", ",
+                            html.B("salt intake"),
+                            ", ",
+                            html.B("stress level"),
+                            ", ",
+                            html.B("diabetes"),
+                            ", and ",
+                            html.B("family history"),
+                            ".",
+                        ]
+                    ),
+                    html.P(
+                        [
+                            "These insights can help identify ",
+                            html.B("higher-risk populations"),
+                            " and support ",
+                            html.B("prevention"),
+                            ", ",
+                            html.B("screening"),
+                            ", ",
+                            html.B("lifestyle interventions"),
+                            ", and better public health decisions.",
+                        ]
+                    ),
+                ],
                 className="overview-note-text",
             ),
         ],
         className="overview-note-wrap",
     )
+
+
+def add_filter_chip(
+    chips: list[tuple[str, str]],
+    filter_key: str,
+    label: str,
+    value: Optional[str],
+) -> None:
+    """
+    Adds one active filter chip if a filter value exists.
+
+    Parameters:
+    - chips: List that stores active filter chips.
+    - filter_key: Internal key used by callbacks to clear the filter.
+    - label: Human-readable filter name.
+    - value: Current filter value.
+    """
+    if value:
+        chips.append((filter_key, f"{label}: {value}"))
 
 
 def build_active_filters_box(
@@ -231,43 +361,53 @@ def build_active_filters_box(
     year_max,
     selected_country=None,
 ):
+    """
+    Builds the active filters panel.
+
+    The panel always shows the selected map metric. Other filter chips
+    appear only when the user has selected them. Each chip is clickable
+    and can be removed through the matching callback.
+
+    Parameters:
+    - metric: Selected map metric.
+    - year_range: Selected year slider range.
+    - sex: Selected sex filter.
+    - age_group: Selected age group filter.
+    - bmi_category: Selected BMI category filter.
+    - smoking: Selected smoking status filter.
+    - physical: Selected physical activity filter.
+    - salt: Selected salt intake filter.
+    - stress: Selected stress level filter.
+    - diabetes: Selected diabetes filter.
+    - family_hx: Selected family history filter.
+    - year_min: Minimum available year.
+    - year_max: Maximum available year.
+    - selected_country: Optional selected country.
+
+    Returns:
+    - A Dash html.Div containing active filter chips.
+    """
     chips = []
 
-    # Always show map metric
-    chips.append(("metric", f"Metric: {MAP_METRICS.get(metric, metric)}"))
+    metric_label = MAP_METRICS.get(metric, metric)
+    chips.append(("metric", f"Metric: {metric_label}"))
 
     if selected_country:
         chips.append(("country", f"Country: {selected_country}"))
 
-    if year_range and (year_range[0] != year_min or year_range[1] != year_max):
-        chips.append(("year", f"Years: {year_range[0]}–{year_range[1]}"))
+    if year_range and len(year_range) == 2:
+        if year_range[0] != year_min or year_range[1] != year_max:
+            chips.append(("year", f"Years: {year_range[0]}–{year_range[1]}"))
 
-    if sex:
-        chips.append(("sex", f"Sex: {sex}"))
-
-    if age_group:
-        chips.append(("age_group", f"Age group: {age_group}"))
-
-    if bmi_category:
-        chips.append(("bmi_category", f"BMI: {bmi_category}"))
-
-    if smoking:
-        chips.append(("smoking", f"Smoking: {smoking}"))
-
-    if physical:
-        chips.append(("physical", f"Physical activity: {physical}"))
-
-    if salt:
-        chips.append(("salt", f"Salt intake: {salt}"))
-
-    if stress:
-        chips.append(("stress", f"Stress: {stress}"))
-
-    if diabetes:
-        chips.append(("diabetes", f"Diabetes: {diabetes}"))
-
-    if family_hx:
-        chips.append(("family_hx", f"Family history: {family_hx}"))
+    add_filter_chip(chips, "sex", "Sex", sex)
+    add_filter_chip(chips, "age_group", "Age group", age_group)
+    add_filter_chip(chips, "bmi_category", "BMI", bmi_category)
+    add_filter_chip(chips, "smoking", "Smoking", smoking)
+    add_filter_chip(chips, "physical", "Physical activity", physical)
+    add_filter_chip(chips, "salt", "Salt intake", salt)
+    add_filter_chip(chips, "stress", "Stress", stress)
+    add_filter_chip(chips, "diabetes", "Diabetes", diabetes)
+    add_filter_chip(chips, "family_hx", "Family history", family_hx)
 
     content = html.Div(
         [

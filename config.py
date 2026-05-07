@@ -1,7 +1,21 @@
 import os
 
+
+# =============================
+# Data source configuration
+# =============================
+
+# Default CSV path. You can override this by setting the BLOOD_PRESSURE_CSV
+# environment variable before running the app.
 DATA_PATH = os.environ.get("BLOOD_PRESSURE_CSV", "Blood_Pressure.csv")
 
+
+# =============================
+# Dataset column configuration
+# =============================
+
+# Columns used by the dashboard.
+# If the CSV contains extra columns, they are ignored during loading.
 ALLOWED_COLUMNS = [
     "Patient_ID",
     "Year",
@@ -31,17 +45,8 @@ ALLOWED_COLUMNS = [
     "BP_Category_2",
 ]
 
-MAP_METRICS = {
-    "Country_HTN_Prevalence_pct": "HTN prevalence (%)",
-    "Systolic_BP_mmHg": "Mean systolic BP (mmHg)",
-    "Diastolic_BP_mmHg": "Mean diastolic BP (mmHg)",
-    "Pulse_Pressure_mmHg": "Mean pulse pressure (mmHg)",
-    "Mean_Arterial_Pressure": "Mean arterial pressure (mmHg)",
-    "Heart_Rate_bpm": "Mean heart rate (bpm)",
-    "BMI": "Mean BMI",
-    "Age": "Mean age",
-}
 
+# Columns that should be converted to numeric values when the data loads.
 NUMERIC_COLUMNS = [
     "Year",
     "Age",
@@ -54,6 +59,35 @@ NUMERIC_COLUMNS = [
     "Country_HTN_Prevalence_pct",
 ]
 
+
+# =============================
+# Map metric configuration
+# =============================
+
+# Metrics available in the map dropdown.
+# Keys are dataframe column names.
+# Values are user-friendly labels shown in the dashboard.
+MAP_METRICS = {
+    "Country_HTN_Prevalence_pct": "HTN prevalence (%)",
+    "Systolic_BP_mmHg": "Mean systolic BP (mmHg)",
+    "Diastolic_BP_mmHg": "Mean diastolic BP (mmHg)",
+    "Pulse_Pressure_mmHg": "Mean pulse pressure (mmHg)",
+    "Mean_Arterial_Pressure": "Mean arterial pressure (mmHg)",
+    "Heart_Rate_bpm": "Mean heart rate (bpm)",
+    "BMI": "Mean BMI",
+    "Age": "Mean age",
+}
+
+
+# Default map metric used when the dashboard first loads or filters reset.
+DEFAULT_MAP_METRIC = "Country_HTN_Prevalence_pct"
+
+
+# =============================
+# Color configuration
+# =============================
+
+# Custom teal color scale used by the choropleth map.
 TEAL_SCALE = [
     [0.0, "#cfeeed"],
     [0.2, "#a8dddd"],

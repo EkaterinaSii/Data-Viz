@@ -4,7 +4,19 @@ from config import MAP_METRICS
 from data import dropdown_options
 
 
+DEFAULT_MAP_METRIC = "Country_HTN_Prevalence_pct"
+
+
 def build_layout(df, year_min: int, year_max: int):
+    """
+    Builds the main dashboard page layout.
+
+    This includes:
+    - hidden stores for selected country, sex, and smoking status
+    - the dashboard header
+    - the left filter panel
+    - the main content area that is updated by callbacks
+    """
     return html.Div(
         [
             dcc.Store(id="selected-country"),
@@ -13,7 +25,10 @@ def build_layout(df, year_min: int, year_max: int):
 
             html.Div(
                 [
-                    html.H1("Blood Pressure Dashboard", className="page-title"),
+                    html.H1(
+                        "Blood Pressure Dashboard",
+                        className="page-title",
+                    ),
                     html.P(
                         "Data visualization dashboard for exploring blood pressure metrics across countries and demographics. "
                         "Click on the map to focus on a specific country, or use the filters to explore different subsets of the data. "
@@ -43,9 +58,23 @@ def build_layout(df, year_min: int, year_max: int):
 
 
 def build_filters_panel(df, year_min: int, year_max: int):
+    """
+    Builds the left sidebar filter panel.
+
+    The panel contains:
+    - map metric selector
+    - year range slider
+    - sex toggle buttons
+    - demographic and health-related dropdown filters
+    - reset country button
+    - clear filters button
+    """
     return html.Div(
         [
-            html.H3("Filters", className="panel-title"),
+            html.H3(
+                "Filters",
+                className="panel-title",
+            ),
 
             html.Div(
                 [
@@ -56,7 +85,7 @@ def build_filters_panel(df, year_min: int, year_max: int):
                             {"label": label, "value": value}
                             for value, label in MAP_METRICS.items()
                         ],
-                        value="Country_HTN_Prevalence_pct",
+                        value=DEFAULT_MAP_METRIC,
                         clearable=False,
                     ),
 
